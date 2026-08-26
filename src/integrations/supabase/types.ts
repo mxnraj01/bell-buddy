@@ -14,7 +14,275 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance_records: {
+        Row: {
+          record_id: string
+          session_id: string
+          status: string
+          student_id: string
+          tap_timestamp: string
+          valid: boolean
+        }
+        Insert: {
+          record_id?: string
+          session_id: string
+          status: string
+          student_id: string
+          tap_timestamp?: string
+          valid?: boolean
+        }
+        Update: {
+          record_id?: string
+          session_id?: string
+          status?: string
+          student_id?: string
+          tap_timestamp?: string
+          valid?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
+      bell_schedule: {
+        Row: {
+          bell_time: string
+          created_at: string
+          end_time: string
+          id: string
+          period_label: string
+          period_type: string
+        }
+        Insert: {
+          bell_time: string
+          created_at?: string
+          end_time: string
+          id?: string
+          period_label: string
+          period_type?: string
+        }
+        Update: {
+          bell_time?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          period_label?: string
+          period_type?: string
+        }
+        Relationships: []
+      }
+      class_sessions: {
+        Row: {
+          bell_time: string
+          broken: boolean
+          classroom_id: string
+          counted: boolean
+          created_at: string
+          current_streak: number
+          period_label: string
+          session_date: string
+          session_id: string
+        }
+        Insert: {
+          bell_time: string
+          broken?: boolean
+          classroom_id: string
+          counted?: boolean
+          created_at?: string
+          current_streak?: number
+          period_label: string
+          session_date?: string
+          session_id?: string
+        }
+        Update: {
+          bell_time?: string
+          broken?: boolean
+          classroom_id?: string
+          counted?: boolean
+          created_at?: string
+          current_streak?: number
+          period_label?: string
+          session_date?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["classroom_id"]
+          },
+        ]
+      }
+      classrooms: {
+        Row: {
+          classroom_id: string
+          corridor_zone: string
+          created_at: string
+          current_streak: number
+          name: string
+        }
+        Insert: {
+          classroom_id: string
+          corridor_zone: string
+          created_at?: string
+          current_streak?: number
+          name: string
+        }
+        Update: {
+          classroom_id?: string
+          corridor_zone?: string
+          created_at?: string
+          current_streak?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      error_log: {
+        Row: {
+          error_type: string
+          id: string
+          logged_at: string
+          raw_input: string | null
+          student_id_attempted: string | null
+        }
+        Insert: {
+          error_type: string
+          id?: string
+          logged_at?: string
+          raw_input?: string | null
+          student_id_attempted?: string | null
+        }
+        Update: {
+          error_type?: string
+          id?: string
+          logged_at?: string
+          raw_input?: string | null
+          student_id_attempted?: string | null
+        }
+        Relationships: []
+      }
+      lateness_reasons: {
+        Row: {
+          created_at: string
+          id: string
+          reason_code: string
+          record_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason_code: string
+          record_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason_code?: string
+          record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lateness_reasons_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_records"
+            referencedColumns: ["record_id"]
+          },
+        ]
+      }
+      reason_categories: {
+        Row: {
+          icon: string
+          label: string
+          reason_code: string
+          sort_order: number
+        }
+        Insert: {
+          icon?: string
+          label: string
+          reason_code: string
+          sort_order?: number
+        }
+        Update: {
+          icon?: string
+          label?: string
+          reason_code?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      reward_config: {
+        Row: {
+          id: number
+          reward_label: string
+          streak_threshold: number
+        }
+        Insert: {
+          id?: number
+          reward_label?: string
+          streak_threshold?: number
+        }
+        Update: {
+          id?: number
+          reward_label?: string
+          streak_threshold?: number
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          created_at: string
+          name: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      walktimes: {
+        Row: {
+          from_zone: string
+          id: string
+          to_classroom_id: string
+          walk_time_seconds: number
+        }
+        Insert: {
+          from_zone: string
+          id?: string
+          to_classroom_id: string
+          walk_time_seconds?: number
+        }
+        Update: {
+          from_zone?: string
+          id?: string
+          to_classroom_id?: string
+          walk_time_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "walktimes_to_classroom_id_fkey"
+            columns: ["to_classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["classroom_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
