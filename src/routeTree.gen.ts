@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as StudentWatchRouteImport } from './routes/student.watch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const StudentIndexRoute = StudentIndexRouteImport.update({
   path: '/student/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentWatchRoute = StudentWatchRouteImport.update({
+  id: '/student/watch',
+  path: '/student/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/student/watch': typeof StudentWatchRoute
   '/student/': typeof StudentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/student/watch': typeof StudentWatchRoute
   '/student': typeof StudentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/student/watch': typeof StudentWatchRoute
   '/student/': typeof StudentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/student/'
+  fullPaths: '/' | '/student/watch' | '/student/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/student'
-  id: '__root__' | '/' | '/student/'
+  to: '/' | '/student/watch' | '/student'
+  id: '__root__' | '/' | '/student/watch' | '/student/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  StudentWatchRoute: typeof StudentWatchRoute
   StudentIndexRoute: typeof StudentIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/watch': {
+      id: '/student/watch'
+      path: '/student/watch'
+      fullPath: '/student/watch'
+      preLoaderRoute: typeof StudentWatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  StudentWatchRoute: StudentWatchRoute,
   StudentIndexRoute: StudentIndexRoute,
 }
 export const routeTree = rootRouteImport
