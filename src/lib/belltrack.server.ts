@@ -54,15 +54,26 @@ export async function validateTapCore(input: TapInput): Promise<TapResult> {
     .maybeSingle();
   if (!student) return fail("Unregistered ID", "Unregistered ID tap — see a teacher.");
 
-  // 2. Matching scheduled class for this timestamp
+  // 2. Matching scheduled class for this timestamp.
+  //    Taps in the transition window before a bell count towards the upcoming class.
   const { data: periods } = await db
     .from("bell_schedule")
     .select("period_label, bell_time, end_time, period_type")
     .order("bell_time");
-  const period = (periods ?? []).find(
-    (p) => input.localTime >= p.bell_time && input.localTime < p.end_time,
-  );
+  const list = periods ?? [];
+  const secs = (t: string) => {
+    const [h, m, s] = t.split(":").map(Number);
+    return (h ?? 0) * 3600 + (m ?? 0) * 60 + (s ?? 0);
+  };
+  const nowSecs = secs(input.localTime);
+  const TRANSITION = 15 * 60; // tap in up to 15 min before the bell
+  const GRACE = 2 * 60; // still "on time" for 2 min after the bell
+
+  const upcoming = list.find((p) => secs(p.bell_time) - nowSecs > 0 && secs(p.bell_time) - nowSecs <= TRANSITION);
+  const current = list.find((p) => input.localTime >= p.bell_time && input.localTime < p.end_time);
+  const period = upcoming ?? current;
   if (!period) return fail("No matching class", "No class scheduled right now.");
+
 
   const { data: classroom } = await db
     .from("classrooms")
@@ -108,9 +119,10 @@ export async function validateTapCore(input: TapInput): Promise<TapResult> {
     .maybeSingle();
   if (existing) return fail("Duplicate tap", "You've already tapped into this class.");
 
-  // 5. Record the valid tap
+  // 5. Record the valid tap (a short grace window after the bell still counts as on time)
   const status: "on-time" | "late" =
-    input.forceLate || input.localTime > period.bell_time ? "late" : "on-time";
+    input.forceLate || nowSecs > secs(period.bell_time) + GRACE ? "late" : "on-time";
+
 
   const inserted = await db
     .from("attendance_records")

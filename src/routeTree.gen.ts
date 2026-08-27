@@ -10,14 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StaffRouteRouteImport } from './routes/staff.route'
+import { Route as StaffIndexRouteImport } from './routes/staff.index'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as StudentDestinationRouteImport } from './routes/student.destination'
+import { Route as StudentReasonRouteImport } from './routes/student.reason'
+import { Route as StudentStreakRouteImport } from './routes/student.streak'
 import { Route as StudentWatchRouteImport } from './routes/student.watch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRouteRoute = StaffRouteRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffIndexRoute = StaffIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StaffRouteRoute,
 } as any)
 const StudentIndexRoute = StudentIndexRouteImport.update({
   id: '/student/',
@@ -29,6 +43,16 @@ const StudentDestinationRoute = StudentDestinationRouteImport.update({
   path: '/student/destination',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentReasonRoute = StudentReasonRouteImport.update({
+  id: '/student/reason',
+  path: '/student/reason',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentStreakRoute = StudentStreakRouteImport.update({
+  id: '/student/streak',
+  path: '/student/streak',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentWatchRoute = StudentWatchRouteImport.update({
   id: '/student/watch',
   path: '/student/watch',
@@ -37,34 +61,72 @@ const StudentWatchRoute = StudentWatchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/staff': typeof StaffRouteRouteWithChildren
   '/student/destination': typeof StudentDestinationRoute
+  '/student/reason': typeof StudentReasonRoute
+  '/student/streak': typeof StudentStreakRoute
   '/student/watch': typeof StudentWatchRoute
+  '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/student/destination': typeof StudentDestinationRoute
+  '/student/reason': typeof StudentReasonRoute
+  '/student/streak': typeof StudentStreakRoute
   '/student/watch': typeof StudentWatchRoute
+  '/staff': typeof StaffIndexRoute
   '/student': typeof StudentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/staff': typeof StaffRouteRouteWithChildren
   '/student/destination': typeof StudentDestinationRoute
+  '/student/reason': typeof StudentReasonRoute
+  '/student/streak': typeof StudentStreakRoute
   '/student/watch': typeof StudentWatchRoute
+  '/staff/': typeof StaffIndexRoute
   '/student/': typeof StudentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/student/destination' | '/student/watch' | '/student/'
+  fullPaths:
+    | '/'
+    | '/staff'
+    | '/student/destination'
+    | '/student/reason'
+    | '/student/streak'
+    | '/student/watch'
+    | '/staff/'
+    | '/student/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/student/destination' | '/student/watch' | '/student'
-  id: '__root__' | '/' | '/student/destination' | '/student/watch' | '/student/'
+  to:
+    | '/'
+    | '/student/destination'
+    | '/student/reason'
+    | '/student/streak'
+    | '/student/watch'
+    | '/staff'
+    | '/student'
+  id:
+    | '__root__'
+    | '/'
+    | '/staff'
+    | '/student/destination'
+    | '/student/reason'
+    | '/student/streak'
+    | '/student/watch'
+    | '/staff/'
+    | '/student/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  StaffRouteRoute: typeof StaffRouteRouteWithChildren
   StudentDestinationRoute: typeof StudentDestinationRoute
+  StudentReasonRoute: typeof StudentReasonRoute
+  StudentStreakRoute: typeof StudentStreakRoute
   StudentWatchRoute: typeof StudentWatchRoute
   StudentIndexRoute: typeof StudentIndexRoute
 }
@@ -77,6 +139,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff/': {
+      id: '/staff/'
+      path: '/'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof StaffIndexRouteImport
+      parentRoute: typeof StaffRouteRoute
     }
     '/student/': {
       id: '/student/'
@@ -92,6 +168,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentDestinationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/reason': {
+      id: '/student/reason'
+      path: '/student/reason'
+      fullPath: '/student/reason'
+      preLoaderRoute: typeof StudentReasonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student/streak': {
+      id: '/student/streak'
+      path: '/student/streak'
+      fullPath: '/student/streak'
+      preLoaderRoute: typeof StudentStreakRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/student/watch': {
       id: '/student/watch'
       path: '/student/watch'
@@ -102,9 +192,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface StaffRouteRouteChildren {
+  StaffIndexRoute: typeof StaffIndexRoute
+}
+
+const StaffRouteRouteChildren: StaffRouteRouteChildren = {
+  StaffIndexRoute: StaffIndexRoute,
+}
+
+const StaffRouteRouteWithChildren = StaffRouteRoute._addFileChildren(
+  StaffRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  StaffRouteRoute: StaffRouteRouteWithChildren,
   StudentDestinationRoute: StudentDestinationRoute,
+  StudentReasonRoute: StudentReasonRoute,
+  StudentStreakRoute: StudentStreakRoute,
   StudentWatchRoute: StudentWatchRoute,
   StudentIndexRoute: StudentIndexRoute,
 }
