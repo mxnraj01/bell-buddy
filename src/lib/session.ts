@@ -11,10 +11,12 @@ export type BellSession = {
 
 const KEY = "belltrack.session";
 
+export const CORRIDOR_ZONES = ["O Block", "Q Block", "HIVE", "R Block", "L Block"];
+
 const empty: BellSession = {
   studentId: null,
   studentName: null,
-  zone: "Science Wing",
+  zone: "O Block",
   destination: null,
   staffName: null,
   lastRecordId: null,
@@ -27,7 +29,9 @@ function read(): BellSession {
   if (typeof window === "undefined") return empty;
   try {
     const raw = window.localStorage.getItem(KEY);
-    return raw ? { ...empty, ...(JSON.parse(raw) as Partial<BellSession>) } : empty;
+    const parsed = raw ? { ...empty, ...(JSON.parse(raw) as Partial<BellSession>) } : empty;
+    // Older sessions stored legacy corridor names.
+    return CORRIDOR_ZONES.includes(parsed.zone) ? parsed : { ...parsed, zone: empty.zone };
   } catch {
     return empty;
   }
@@ -58,11 +62,3 @@ export function useSession(): BellSession {
     () => empty,
   );
 }
-
-export const CORRIDOR_ZONES = [
-  "Science Wing",
-  "Gym Corridor",
-  "Library Corridor",
-  "Arts Corridor",
-  "Main Corridor",
-];
