@@ -119,9 +119,10 @@ export async function validateTapCore(input: TapInput): Promise<TapResult> {
     .maybeSingle();
   if (existing) return fail("Duplicate tap", "You've already tapped into this class.");
 
-  // 5. Record the valid tap
+  // 5. Record the valid tap (a short grace window after the bell still counts as on time)
   const status: "on-time" | "late" =
-    input.forceLate || input.localTime > period.bell_time ? "late" : "on-time";
+    input.forceLate || nowSecs > secs(period.bell_time) + GRACE ? "late" : "on-time";
+
 
   const inserted = await db
     .from("attendance_records")
