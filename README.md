@@ -1,199 +1,423 @@
-# Bell Buddy
+# BellTrack
 
-0. What you're building
+BellTrack is a proof-of-concept system designed to help reduce student lateness at **Bacchus Marsh Grammar (BMG)**.
 
-BellTrack is a student-lateness proof-of-concept for Bacchus Marsh Grammar. It has three connected parts that must feel like one system, not three separate apps:
+The system has three main parts:
 
-Watch/Display simulation — a full-screen web view standing in for a wearable device, worn by "a student." Shows a live countdown to the next bell, a walk-time estimate to a chosen classroom, and a one-tap "why were you late" prompt.
+* **Student Watch** — a web interface that simulates a wearable device.
+* **Backend & Database** — stores things like students, bells, classrooms, walk times, attendance and lateness data.
+* **Admin Dashboard** — allows staff to manage the system and view attendance data.
 
-Backend + database — stores the bell schedule, walktimes between locations, students, attendance/lateness records, reason codes, and class on-time streaks. Real persistence (use Supabase, not local-only state) so the demo actually proves data survives a refresh — but this is a proof-of-concept, not a production system. Don't build offline caching, background sync, or auth hardening.
+The main goal is to make something that is actually clickable and data-driven, rather than just a static mockup. It is still a proof-of-concept, so things like real hardware, GPS and production-level security are outside the scope of the project.
 
-Admin dashboard — a normal desktop-style web dashboard for staff to edit the bell schedule, walktime matrix, reward thresholds, and reason categories, and to view live attendance/streak data.
+---
 
-Goal bar: more convincing than a static mockup, not production-ready. It should be genuinely clickable and data-driven — real inserts, real reads, real validation logic — but doesn't need offline robustness, real indoor positioning, real hardware, or auth security beyond a simple role toggle (Student view / Admin view).
+## Users
 
-1. Users
+### Student
 
-Student — interacts only with the Watch/Display screens. No login needed; simulate "logged in as [Student Name]" via a simple picker on first load (stand-in for wearable pairing).
+Students only interact with the Watch side of the system.
 
-Admin/Teacher — interacts only with the Admin Dashboard. Simple role switch (no real auth) to get there — e.g. a "Staff Login" button that just asks for a name, no password required for the POC.
+There is no proper login system. A student is selected from a seeded list when the app starts, which acts as a basic simulation of pairing the wearable to a student.
 
-Add a simple landing screen with two buttons: "I'm a Student" and "I'm Staff", routing to the two halves of the app.
+### Staff
 
-2. Visual identity
+Staff use the Admin Dashboard.
 
-Pull this directly from the existing design docs — keep it consistent across every screen:
+There is no real authentication for the POC. The landing page simply has an **"I'm Staff"** option that takes the user to the admin side.
 
-Primary colors: green, orange, dark blue (use green = on-time/good, orange = getting close/warning, dark blue = structural/background/branding — this maps naturally onto the countdown urgency system in section 4).
+### Landing Page
 
-One consistent font family across the whole app (student and admin sides both).
+The app starts with two options:
 
-Watch/Display screens should look like a wearable face: large, bold, high-contrast, minimal chrome, dark background with bright text — legible "from 5 metres away" is the design brief, so oversized type, no small print, no dense layouts.
+* **I'm a Student**
+* **I'm Staff**
 
-Admin Dashboard should look like a normal SaaS dashboard: sidebar or top nav, tables, forms, cards — standard Lovable/shadcn dashboard conventions are fine here.
-UI reference (from mockups) — add to section 2:
+These take the user to the relevant part of the system.
 
-Header bar (every watch screen): small clock/location icon + corridor label on the left (e.g. "BMG — Science Wing"), a large digital clock top-right in bright mint/neon green, monospace-style digits.
+---
 
-Background: near-black navy across all watch screens, white/light-grey body text, orange used for the "hero" number (countdown, streak digits) and for alert states.
+## Design
 
-Destination input screen: big centered heading ("Where are you headed?"), a dashed placeholder box that fills in as digits are entered, a numeric keypad (0–9 + backspace) plus quick-pick classroom shortcut buttons above it (e.g. "A101," "B204" with a subtitle tag), and a disabled/greyed "Confirm Destination →" button that activates once input is valid.
+The design is based around BMG and the original project mockups.
 
-Reason capture screen: heading ("Why are you late?"), a 3×2 grid of large tappable cards, each with an icon + label (Locker / Bathroom / Held up by Teacher / Talking with Friends / Got Lost / Other) — no text entry anywhere.
+### Colours
 
-Main countdown screen: "Next Bell in…" label, huge bordered countdown box in orange, a one-line walk-time hint underneath, and a full-width blue "Tap to Enter Next Class →" button.
+The main colours are:
 
-Error/offline state: same layout family but with a status pill at the top (e.g. orange "Offline Mode Active" banner, or a red "Unregistered ID Tap" card with a short explanation and Try Again / Get Help buttons) — errors reuse the same visual language, they don't look like a broken screen.
+* **Green** — on-time / good
+* **Orange** — getting close / warning
+* **Dark blue / navy** — backgrounds and branding
 
-Streak screen: "ON-TIME STREAK" label, large green streak number ("12 Days"), a reward progress card with a labeled progress bar (e.g. "Pizza Party Unlock — Next: 15 Days"), and a red warning strip ("STREAK RESETS IF ANYONE IS LATE!").
+The colours also help show how much time is left before the bell.
 
-Admin dashboard: left sidebar nav (Schedule / Walktime Data / Class Rewards / System Settings, Emergency Broadcast + Support/Logout pinned at the bottom), top bar with search + sync status ("System Synchronized," last sync time), a Bell Schedule Editor table (period/start/end/duration/type with inline edit), and side panels for Reward Thresholds and Lateness Reasons, plus a Walktime Mapping data section below.
+### Student Watch
 
-Branding note: rename everything — corridor header, admin portal title, footer text — to BMG (Bacchus Marsh Grammar). Replace "West High Corridor" → "BMG Corridor" (or the specific wing, e.g. "BMG — Science Wing") and "ChronosLink Admin" → "BellTrack Admin — BMG."
+The Watch side is designed to look like a wearable rather than a normal website.
 
+It uses:
 
-3. Screens to build
+* A dark navy background
+* Large text
+* High contrast
+* Bright digital-style numbers
+* Minimal UI
+* Large buttons that are easy to tap
 
-Build all of these as real, navigable routes — this maps to the storyboard pages already designed for this project:
+The important information should be readable quickly without having to look closely at the screen.
 
-Student / Watch side
+Each Watch screen has a header with the current BMG corridor or wing and a digital clock.
 
-Student picker (mock pairing) — pick a student from a seeded list to "wear" the watch as. Stores selection in session state.
+### Admin Dashboard
 
-Timer / Countdown page (main watch face) — the default screen. Shows:
+The admin side uses a normal dashboard layout with:
 
-Live countdown to the next scheduled bell (large, central).
+* A sidebar
+* Tables
+* Forms
+* Summary cards
+* Configuration sections
+* Attendance and error logs
 
-Color-coded urgency: green (plenty of time), amber/orange (cutting it close), red (late or about to be).
+The main sections are:
 
-A button/tile to go pick a destination classroom.
+* Schedule
+* Walktime Data
+* Class Rewards
+* System Settings
+* Emergency Broadcast
+* Support
+* Logout
 
-Location/classroom code input page — student selects (or types a short code for) the classroom they're heading to. On selection, look up the walktime between "current corridor location" (simulate 4–6 named corridor zones, e.g. "Science Wing," "Gym Corridor," "Library Corridor") and the chosen classroom.
+---
 
-Walktime + combined countdown view — after a classroom is chosen, the main watch face updates to show both the bell countdown and the walk-time estimate together, color-coded the same way (e.g. red if walk-time > time remaining).
+## Student Screens
 
-ID Tap / secondary countdown page — simulates tapping into a classroom (a big "Tap In" button). On tap, run the validation logic in section 5 and show a confirmation flash (must feel like it resolves in under a second — no loading spinners).
+### Student Picker
 
-Late reason capture page — appears automatically only if the tap was after the bell time. One-tap, no typing: buttons for Locker / Bathroom / Held up by teacher / Talking with friends / Got lost / Other. Must be selectable in a single tap, large touch targets, no scrolling required.
+A student can select their name from the seeded list.
 
-Streak page — shows the current class's on-time streak (e.g. "12 DAY STREAK 🔥"), and whether a reward threshold has just been hit.
+The selection is saved for the current session and is used when recording attendance.
 
-Admin side
+### Countdown
 
-Admin dashboard home — overview cards: today's attendance summary, active streaks across classes, recent lateness reasons breakdown (simple chart is fine).
+The main Watch screen shows:
 
-Bell schedule editor — table/form to add, edit, delete bell times.
+* Time until the next bell
+* Current time
+* Destination, if selected
+* Walking time, if available
 
-Walktime matrix editor — editable grid/table of walk-time-in-seconds between corridor locations and classrooms (matches the data dictionary: 0–60+ range, per-room, admin-editable).
+The countdown changes colour depending on how much time is left:
 
-Reward threshold & reason category config — lets admin change what streak length triggers a reward, and edit/add/remove the list of lateness reason categories (these must not be hardcoded elsewhere in the app — the student-side reason buttons should read from this config).
+* **Green** — plenty of time
+* **Orange** — getting close
+* **Red** — not enough time or already late
 
-Attendance / lateness log viewer — filterable table of raw tap records (student, class, timestamp, on-time/late, reason, valid/error flag) — this is the "error log for review" the design doc calls for.
+### Destination
 
-4. Countdown & walk-time logic (Section 3 IPO from the design doc)
+A classroom can be selected using a quick-pick button or a short classroom code.
 
-Pull the next bell time from the bell schedule table and compute a live countdown against current system time.
+Once a classroom is selected, the system looks up the walking time between the student's current corridor zone and that classroom.
 
-If the student has chosen a destination classroom, pull the walktime (seconds) between their current corridor zone and that classroom from the walktime matrix.
+### Walk Time
 
-Compute urgency and color-code:
+The Watch shows the walking time alongside the bell countdown.
 
-Green — time remaining until bell is comfortably more than the walk-time needed.
+For example, if there are 45 seconds until the bell but the estimated walk takes 60 seconds, the Watch changes to red to show that the student is running late.
 
-Amber — time remaining is close to (roughly within touching distance of) the walk-time needed.
+### Tap In
 
-Red — time remaining is less than the walk-time needed, or the bell has already gone.
+The **"Tap In"** button simulates the student tapping into their classroom.
 
-Render both numbers (bell countdown + walk estimate) together on the main watch face once a destination is picked.
+The tap is sent to the backend and validated there.
 
-5. Tap validation logic (Section 7 pseudocode from the design doc)
+The result should appear almost immediately, without a loading spinner.
 
-Implement this exactly as the source design's algorithm, translated into your backend logic (edge function / server logic, not just client-side):
+### Late Reason
 
-ValidateTap(studentID, timestamp):
-  if studentID not in enrolment table -> reject as "Unregistered ID"
-  if studentID already has a valid tap for this class session -> reject as "Duplicate tap"
-  if there is no scheduled class matching this timestamp -> reject as "No matching class"
+If the student taps in after the bell, a reason screen appears.
 
-  otherwise:
-    record a valid tap
-    if timestamp is after the class's BellTime -> mark as late, prompt for a reason (screen 6)
-    else -> mark as on-time
-    run UpdateStreak() for that class (section 6 below)
+The default reasons are:
 
-Rejected taps should still write to an error log (visible in the admin log viewer, screen 12) rather than silently failing or crashing — this satisfies the "graceful handling of invalid input" non-functional requirement. On the watch side, a rejected tap should show a short, calm error state (e.g. "Couldn't log that tap — see a teacher"), never a raw error or crash.
+* Locker
+* Bathroom
+* Held up by Teacher
+* Talking with Friends
+* Got Lost
+* Other
 
-6. Streak logic (Section 5 IPO from the design doc)
+There is no text box. A reason is selected with one tap.
 
-Each class session tracks a ClassStreak integer (must never go negative).
+### Streak
 
-When a class session ends (or as taps come in), check every student's on-time/late status for that session:
+The streak screen shows the current class streak and progress towards the next reward.
 
-If all students were on-time → increment the streak by 1.
+Example:
 
-If any student was late → reset the streak to 0.
+**12 DAY STREAK 🔥**
 
-When the streak reaches the admin-configured reward threshold, trigger a reward-unlock state: show a visible notification/animation on the streak page and flag it in the admin dashboard overview.
+A reward card can show something like:
 
-7. Data model (seed with realistic fake data, ~15–20 students, ~6 classrooms, a full day's bell schedule)
+**Pizza Party Unlock — Next: 15 Days**
 
-TableKey fieldsstudentsstudent_id (6-digit text), nameclassroomsclassroom_id, name, corridor_zonebell_schedulebell_time, period_labelwalktimesfrom_zone, to_classroom_id, walk_time_seconds (0–60+, admin-editable)class_sessionssession_id, classroom_id, bell_time, current_streakattendance_recordsstudent_id, session_id, timestamp, status (on-time/late), valid (bool)lateness_reasonsrecord_id → attendance_records, reason_codereason_categoriesreason_code, label (admin-editable list; seed with Locker / Bathroom / Held up by teacher / Talking with friends / Got lost / Other)reward_configstreak_threshold (admin-editable)error_logtimestamp, student_id_attempted, error_type, raw_input
+If someone is late, the class streak resets.
 
-Keep field names/types close to the original data dictionary (e.g. StudentID as 6-digit text, timestamps as full datetime, WalkTimeSec as an integer) so the demo still visibly traces back to the design doc.
+---
 
-8. Explicitly out of scope — do not build these
+## Admin Screens
 
-Any real wearable hardware or hardware-specific code.
+### Dashboard
 
-Real offline mode / background sync when WiFi drops (the design doc calls for this long-term, but it is not part of this POC).
+The dashboard gives a quick overview of the system, including:
 
-Real indoor positioning / GPS — corridor location is just a manually selected dropdown.
+* Today's attendance
+* Current class streaks
+* Recent lateness reasons
+* Recent tap activity
 
-Integration with real school systems (timetable software, Schoolbox, parent apps).
+### Bell Schedule
 
-Any disciplinary/penalty automation — this system only rewards and logs, never punishes.
+Staff can add, edit and delete bell times.
 
-Predictive analytics or AI behaviour modelling.
+Each bell contains information such as:
 
-A real mobile phone app — everything is the watch-simulation web view plus the admin dashboard.
+* Period
+* Start time
+* End time
+* Duration
+* Type
 
-Real authentication/security — a name-only "login" is enough for both roles.
+### Walktime Matrix
 
-9. What "done" looks like for this demo
+Staff can edit the estimated walking time between corridor zones and classrooms.
 
-Someone should be able to:
+Walking times are stored in seconds.
 
-Land on the app, pick "I'm a Student," choose a seeded student, land on the watch face and see a live countdown.
+### Rewards & Reasons
 
-Pick a destination classroom and see the walk-time + countdown combine, color-coded.
+Staff can change:
 
-Tap "Tap In" — if late, get prompted for a one-tap reason, then see a streak update (or reset) reflected on the streak page.
+* The streak length needed for a reward
+* The available lateness reasons
 
-Try tapping in twice, or with an unregistered/edge-case ID, and see it gracefully rejected (not crash), and see that rejection show up in the admin error log.
+Lateness reasons are stored in the database rather than being hardcoded into the student interface.
 
-Switch to "I'm Staff," land on the admin dashboard, see the tap that just happened reflected in the attendance log and overview cards.
+This means adding a new reason in the admin dashboard automatically adds it as an option on the student side.
 
-Edit the bell schedule, walktime matrix, reward threshold, or reason categories in the admin dashboard, then go back to the student side and see those changes actually take effect (e.g. a new reason category appears as a tap-able option; a changed bell time changes the countdown).
+### Attendance Log
 
-That end-to-end loop — student action → real database write → admin dashboard reflects it → admin config change → student side reflects it — is the single most important thing to get working. Prioritize that over polish anywhere else.
+The attendance log shows individual tap records, including:
 
-This project was built with [Lovable](https://lovable.dev).
+* Student
+* Class
+* Timestamp
+* On-time / late status
+* Lateness reason
+* Valid / invalid status
 
-## Build with Lovable
+Rejected taps are also saved in the error log.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/27d41f41-4682-45c5-8d69-5067f3132721).
+---
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Countdown & Walk-Time Logic
+
+The countdown is based on the bell schedule stored in the database.
+
+The system finds the next bell and calculates how much time is left using the current time.
+
+If a destination has been selected, the walking time between the current corridor zone and classroom is also retrieved.
+
+The two values are then compared.
+
+### Green
+
+There is comfortably more time left than the estimated walking time.
+
+### Orange
+
+The amount of time left is getting close to the estimated walking time.
+
+### Red
+
+The walking time is longer than the time remaining, or the bell has already passed.
+
+Once a destination is selected, both the bell countdown and walking time are shown on the Watch.
+
+---
+
+## Tap Validation
+
+Tap validation happens on the backend.
+
+The basic process is:
+
+```text
+ValidateTap(studentID, timestamp)
+
+1. Check that the student exists.
+   → If not, reject as "Unregistered ID".
+
+2. Check if the student has already tapped in
+   for the current class session.
+   → If yes, reject as "Duplicate tap".
+
+3. Check if there is a scheduled class
+   matching the timestamp.
+   → If not, reject as "No matching class".
+
+4. If everything is valid:
+   → Record the tap.
+   → Mark it as late if it is after the bell.
+   → Otherwise mark it as on-time.
+   → Update the class streak.
+```
+
+Rejected taps are still saved to the error log.
+
+On the Watch, errors are shown using a simple message such as:
+
+> Couldn't log that tap — please see a teacher.
+
+Raw backend errors should never be shown to students.
+
+---
+
+## Streak System
+
+Each class has a current streak.
+
+The streak starts at zero and can never go below zero.
+
+At the end of a class session:
+
+* If every student was on-time, the streak increases by 1.
+* If any student was late, the streak resets to 0.
+
+When the streak reaches the reward threshold set by staff, the reward is unlocked.
+
+The student sees this on the streak screen and the admin dashboard also shows that the reward has been reached.
+
+---
+
+## Database
+
+The project uses **Supabase** for the database and persistent data.
+
+The main tables are:
+
+| Table                | Purpose                                   |
+| -------------------- | ----------------------------------------- |
+| `students`           | Stores student information                |
+| `classrooms`         | Stores classroom and corridor information |
+| `bell_schedule`      | Stores bell times                         |
+| `walktimes`          | Stores walking times                      |
+| `class_sessions`     | Stores class sessions and streaks         |
+| `attendance_records` | Stores student tap and attendance data    |
+| `lateness_reasons`   | Links attendance records to reasons       |
+| `reason_categories`  | Stores the available lateness reasons     |
+| `reward_config`      | Stores the reward threshold               |
+| `error_log`          | Stores rejected taps and errors           |
+
+The database should contain realistic fake data, including:
+
+* Around 15–20 students
+* Around 6 classrooms
+* A full day's bell schedule
+* Several corridor zones
+* Walking times between locations
+* The default lateness reasons
+
+Field names and types should stay reasonably close to the original data dictionary. For example, student IDs should be six-digit text values and walking times should be stored as integers.
+
+---
+
+## Out of Scope
+
+The following are not part of this POC:
+
+* Real wearable hardware
+* Hardware-specific code
+* Real offline mode
+* Background sync
+* GPS or indoor positioning
+* Integration with school timetable systems
+* Schoolbox or parent-app integration
+* Disciplinary or punishment systems
+* Predictive analytics
+* AI behaviour modelling
+* A native mobile app
+* Production-level authentication and security
+
+The corridor location is manually selected and authentication is kept simple.
+
+The system is designed to **reward and record**, not punish.
+
+---
+
+## What "Done" Looks Like
+
+The main demo flow should work like this:
+
+1. Open BellTrack.
+2. Select **I'm a Student**.
+3. Choose a student.
+4. See the live countdown.
+5. Choose a destination classroom.
+6. See the walking time alongside the countdown.
+7. Tap **Tap In**.
+8. If late, select a reason.
+9. See the class streak update.
+10. Switch to **I'm Staff**.
+11. See the attendance record in the admin dashboard.
+12. See rejected taps in the error log.
+13. Change something in the admin dashboard.
+14. Return to the student side and see the change.
+
+For example, adding a new lateness reason should make that reason appear on the student side. Changing a bell time should also change the countdown.
+
+The most important part of the project is:
+
+**Student action → Database → Admin Dashboard → Admin Changes → Student Interface**
+
+Getting this full loop working properly is more important than adding extra features or polishing the UI.
+
+---
+
+## Tech Stack
+
+* **Frontend:** Web application
+* **Backend / Database:** Supabase
+* **UI:** Responsive web interface
+* **Development:** Lovable
+
+This project was built using Lovable.
+
+[Lovable](https://lovable.dev?utm_source=chatgpt.com)
+
+---
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Node.js and npm are required to run the project locally.
 
-```sh
+```bash
 git clone <this-repository-url>
 cd <repository-name>
-npm i
+npm install
 npm run dev
 ```
+
+The project can also be continued through the Lovable editor.
+
+[Lovable Project Editor](https://lovable.dev/projects/27d41f41-4682-45c5-8d69-5067f3132721?utm_source=chatgpt.com)
+
+---
+
+## Project Status
+
+**Proof of Concept**
+
+BellTrack is currently focused on demonstrating the main idea and the complete student → database → admin workflow.
+
+It is not intended to be used as a real school system yet.
